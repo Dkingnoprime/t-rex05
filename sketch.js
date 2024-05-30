@@ -1,3 +1,8 @@
+var PLAY = 1
+var END = 0
+var gamestate = PLAY
+
+
 var trex, trex_running, edges;
 var groundImage;
 var cloud, cloudImg
@@ -31,6 +36,11 @@ function setup() {
   invisibleGround = createSprite(200, 190, 400, 10);
   invisibleGround.visible = false;
 
+  obstaculesGroup = new Group()
+  cloudsGroup = new Group()
+
+
+
   //adicione dimensão e posição ao trex
   trex.scale = 0.5;
   trex.x = 50
@@ -40,26 +50,34 @@ function setup() {
 function draw() {
   //definir a cor do plano de fundo 
   background(300);
-  //movimento do chão
-  ground.velocityX = -3
-  if (ground.x < 0) {
-    ground.x = ground.width / 2
+
+  if (gamestate === PLAY) {
+    //movimento do chão
+    ground.velocityX = -3
+    if (ground.x < 0) {
+      ground.x = ground.width / 2
+    }
+    trex.velocityY = trex.velocityY + 0.5;
+    //pular quando tecla de espaço for pressionada
+    if (keyDown("space") && trex.y >= 155) {
+      trex.velocityY = -10;
+    }
+    if (obstaculesGroup.isTouching(trex)) {
+      gamestate=END
+    }
+    spawnClouds()
+    spawnCac()
+  } else if (gamestate === END) {
+     ground.velocityX = 0
+     obstaculesGroup.setVelocityXEach(0)
+     cloudsGroup.setVelocityXEach(0)
   }
+
   //registrando a posição y do trex
   console.log(trex.y)
 
-  //pular quando tecla de espaço for pressionada
-  if (keyDown("space") && trex.y >= 155) {
-    trex.velocityY = -10;
-
-  }
-
-  trex.velocityY = trex.velocityY + 0.5;
-
   //impedir que o trex caia
   trex.collide(invisibleGround)
-  spawnClouds()
-  spawnCac()
   drawSprites();
 }
 
@@ -71,6 +89,7 @@ function spawnClouds() {
     cloud.scale = 0.4;
     cloud.y = Math.round(random(60, 90));
     cloud.lifetime = 200
+    cloudsGroup.add(cloud)
   }
 }
 function spawnCac() {
@@ -94,7 +113,8 @@ function spawnCac() {
       default:
         break;
     }
-    cacs.scale=0.4
+    cacs.scale = 0.4
     cacs.lifetime = 220
+    obstaculesGroup.add(cacs)
   }
 }
