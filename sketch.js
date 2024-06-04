@@ -2,15 +2,17 @@ var PLAY = 1
 var END = 0
 var gamestate = PLAY
 
-
 var trex, trex_running, edges;
+var trexcollide
 var groundImage;
 var cloud, cloudImg
 
 var cac1, cac2, cac3, cac4, cac5, cac5
+var gameover, gameoverimg, restart, restartimg
 
 function preload() {
   trex_running = loadAnimation("trex1.png", "trex3.png", "trex4.png");
+  trexcollide = loadImage("trexdead.png")
   groundImage = loadImage("ground2.png")
   cloudImg = loadImage("cloud.png")
   cac1 = loadImage("obstacle1.png")
@@ -19,6 +21,8 @@ function preload() {
   cac4 = loadImage("obstacle4.png")
   cac5 = loadImage("obstacle5.png")
   cac6 = loadImage("obstacle6.png")
+  gameoverimg = loadImage("gameOver.png")
+  restartimg = loadImage("restart.png")
 }
 
 function setup() {
@@ -27,7 +31,10 @@ function setup() {
   //criando o trex
   trex = createSprite(50, 160, 20, 50);
   trex.addAnimation("running", trex_running);
+  trex.addAnimation("dead", trexcollide);
+  trex.debug = true
   edges = createEdgeSprites();
+  trex.setCollider("rectangle", 0, 0, 85, 100)
 
   ground = createSprite(200, 180, 800, 20);
   ground.addImage(groundImage)
@@ -38,6 +45,15 @@ function setup() {
 
   obstaculesGroup = new Group()
   cloudsGroup = new Group()
+  gameover = createSprite(270, 100)
+  gameover.addImage(gameoverimg)
+  gameover.visible = false
+  gameover.scale = 0.7
+  restart = createSprite(270, 130)
+  restart.addImage(restartimg)
+  restart.visible = false
+  restart.scale = 0.5
+
 
 
 
@@ -63,14 +79,21 @@ function draw() {
       trex.velocityY = -10;
     }
     if (obstaculesGroup.isTouching(trex)) {
-      gamestate=END
+      gamestate = END
     }
     spawnClouds()
     spawnCac()
   } else if (gamestate === END) {
-     ground.velocityX = 0
-     obstaculesGroup.setVelocityXEach(0)
-     cloudsGroup.setVelocityXEach(0)
+    ground.velocityX = 0
+    obstaculesGroup.setVelocityXEach(0)
+    cloudsGroup.setVelocityXEach(0)
+    trex.changeAnimation("dead", trexcollide)
+    trex.scale = 0.1
+    obstaculesGroup.setLifetimeEach(-1)
+    cloudsGroup.setLifetimeEach(-1)
+    trex.velocityY = 0
+    gameover.visible = true
+    restart.visible = true
   }
 
   //registrando a posição y do trex
