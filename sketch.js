@@ -1,6 +1,10 @@
 var PLAY = 1
 var END = 0
 var gamestate = PLAY
+var morri
+var jump
+var point
+var score = 0 
 
 var trex, trex_running, edges;
 var trexcollide
@@ -23,6 +27,9 @@ function preload() {
   cac6 = loadImage("obstacle6.png")
   gameoverimg = loadImage("gameOver.png")
   restartimg = loadImage("restart.png")
+  jump = loadSound("jump.mp3")
+  point = loadSound("checkpoint.mp3")
+  morri = loadSound("morri-meme-1_eajUyjwb.mp3")
 }
 
 function setup() {
@@ -34,7 +41,7 @@ function setup() {
   trex.addAnimation("dead", trexcollide);
   trex.debug = true
   edges = createEdgeSprites();
-  trex.setCollider("rectangle", 0, 0, 85, 100)
+  trex.setCollider("circle", 0, 0, 42)
 
   ground = createSprite(200, 180, 800, 20);
   ground.addImage(groundImage)
@@ -66,10 +73,18 @@ function setup() {
 function draw() {
   //definir a cor do plano de fundo 
   background(300);
+  //pontos
+  fill ("black")
+  text("Score: " +score, 520, 90)
 
   if (gamestate === PLAY) {
+
+    score=score +Math.round(frameCount/20)
+    if (score>0 && score%100===0){
+     point.play()
+    }
     //movimento do chão
-    ground.velocityX = -3
+    ground.velocityX = -(3 + 3*score/100)
     if (ground.x < 0) {
       ground.x = ground.width / 2
     }
@@ -77,9 +92,11 @@ function draw() {
     //pular quando tecla de espaço for pressionada
     if (keyDown("space") && trex.y >= 155) {
       trex.velocityY = -10;
+      jump.play()
     }
     if (obstaculesGroup.isTouching(trex)) {
       gamestate = END
+      morri.play()
     }
     spawnClouds()
     spawnCac()
@@ -118,7 +135,7 @@ function spawnClouds() {
 function spawnCac() {
   if (frameCount % 120 === 0) {
     cacs = createSprite(580, 167, 30, 30);
-    cacs.velocityX = -3;
+    cacs.velocityX = -(3 + score/100);
     var num = Math.round(random(1, 6));
     switch (num) {
       case 1: cacs.addImage(cac1)
