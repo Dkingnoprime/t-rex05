@@ -39,7 +39,7 @@ function setup() {
   trex = createSprite(50, 160, 20, 50);
   trex.addAnimation("running", trex_running);
   trex.addAnimation("dead", trexcollide);
-  trex.debug = true
+ // trex.debug = true
   edges = createEdgeSprites();
   trex.setCollider("circle", 0, 0, 42)
 
@@ -77,9 +77,10 @@ function draw() {
   fill ("black")
   text("Score: " +score, 520, 90)
 
+
   if (gamestate === PLAY) {
 
-    score=score +Math.round(frameCount/20)
+    score=score +Math.round(getFrameRate()/60)
     if (score>0 && score%100===0){
      point.play()
     }
@@ -100,6 +101,9 @@ function draw() {
     }
     spawnClouds()
     spawnCac()
+    
+
+
   } else if (gamestate === END) {
     ground.velocityX = 0
     obstaculesGroup.setVelocityXEach(0)
@@ -109,8 +113,11 @@ function draw() {
     obstaculesGroup.setLifetimeEach(-1)
     cloudsGroup.setLifetimeEach(-1)
     trex.velocityY = 0
-    gameover.visible = true
+    gameover.visible = true 
     restart.visible = true
+    if (mousePressedOver(restart)){
+      reset()
+    }
   }
 
   //registrando a posição y do trex
@@ -135,7 +142,7 @@ function spawnClouds() {
 function spawnCac() {
   if (frameCount % 120 === 0) {
     cacs = createSprite(580, 167, 30, 30);
-    cacs.velocityX = -(3 + score/100);
+    cacs.velocityX = -(4 + score/100);
     var num = Math.round(random(1, 6));
     switch (num) {
       case 1: cacs.addImage(cac1)
@@ -157,4 +164,14 @@ function spawnCac() {
     cacs.lifetime = 220
     obstaculesGroup.add(cacs)
   }
+}
+function reset() {
+  gamestate = PLAY
+  gameover.visible = false 
+  restart.visible = false
+  cloudsGroup.destroyEach()
+  obstaculesGroup.destroyEach()
+  trex.changeAnimation("running")
+  trex.scale=0.5
+  score=0
 }
